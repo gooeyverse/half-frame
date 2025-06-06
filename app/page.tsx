@@ -821,9 +821,7 @@ export default function CameraApp() {
           </Button>
         </div>
       )}
-      <div className="flex flex-row items-center gap-8 p-4 h-full">
-        {" "}
-        {/* Removed justify-center */}
+      <div className="flex flex-row items-center justify-center gap-8 p-4 h-full">
         {/* Filter Selection Buttons */}
         {hasPermission && isActive && !capturedPhoto && (
           <div
@@ -933,12 +931,11 @@ export default function CameraApp() {
             </Button>
           </div>
         )}
+
         {/* Main content area - Centered */}
         <div className="flex flex-col items-center overflow-y-hidden flex-1">
-          {" "}
-          {/* Added flex-1 */}
           {/* Viewfinder */}
-          <Card className="w-full max-w-3xl overflow-hidden flex-shrink-0">
+          <Card className="w-full max-w-full overflow-hidden">
             <CardContent className="p-0">
               <div className="relative aspect-[3/4] w-full bg-black">
                 {error && (
@@ -971,6 +968,7 @@ export default function CameraApp() {
               </div>
             </CardContent>
           </Card>
+
           {/* Control buttons */}
           <div className="flex gap-4 mt-6">
             {!capturedPhoto ? (
