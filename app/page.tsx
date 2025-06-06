@@ -835,10 +835,10 @@ export default function CameraApp() {
             }}
           >
             <style jsx>{`
-            div::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
             <Button
               onClick={() => setActiveFilter("none")}
               size="sm"
@@ -935,7 +935,7 @@ export default function CameraApp() {
         {/* Main content area - Centered */}
         <div className="flex flex-col items-center overflow-y-hidden">
           {/* Viewfinder */}
-          <Card className="w-full max-w-md overflow-hidden flex-shrink-0">
+          <Card className="w-full max-w-xl overflow-hidden flex-shrink-0">
             <CardContent className="p-0">
               <div className="relative aspect-[3/4] w-full bg-black">
                 {error && (
@@ -989,17 +989,17 @@ export default function CameraApp() {
 
                 {/* Switch Camera Button */}
                 {/*                   <Button
-              onClick={switchCamera}
-              size="lg"
-              variant="outline"
-              className={`rounded-full w-16 h-16 flex items-center justify-center ${
-                !hasPermission || !isActive ? "invisible" : ""
-              }`}
-              disabled={!hasPermission || !isActive}
-            >
-              <FlipCamera className="w-6 h-6" />
-              <span className="sr-only">Switch Camera</span>
-            </Button> */}
+            onClick={switchCamera}
+            size="lg"
+            variant="outline"
+            className={`rounded-full w-16 h-16 flex items-center justify-center ${
+              !hasPermission || !isActive ? "invisible" : ""
+            }`}
+            disabled={!hasPermission || !isActive}
+          >
+            <FlipCamera className="w-6 h-6" />
+            <span className="sr-only">Switch Camera</span>
+          </Button> */}
               </>
             ) : (
               <>
