@@ -935,7 +935,7 @@ export default function CameraApp() {
                   </Button>
 
                   {/* Switch Camera Button */}
-                  <Button
+{/*                   <Button
                     onClick={switchCamera}
                     size="lg"
                     variant="outline"
@@ -946,7 +946,7 @@ export default function CameraApp() {
                   >
                     <FlipCamera className="w-6 h-6" />
                     <span className="sr-only">Switch Camera</span>
-                  </Button>
+                  </Button> */}
                 </>
               ) : (
                 <>
