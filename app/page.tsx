@@ -821,7 +821,7 @@ export default function CameraApp() {
           </Button>
         </div>
       )}
-      <div className="flex flex-row items-center gap-8 p-4 h-full w-full">
+      <div className="flex flex-row items-center gap-8 p-4 h-full w-1/2">
         {/* Filter Selection Buttons */}
         {hasPermission && isActive && !capturedPhoto && (
           <div
@@ -835,10 +835,10 @@ export default function CameraApp() {
             }}
           >
             <style jsx>{`
-        div::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
+      div::-webkit-scrollbar {
+        display: none;
+      }
+    `}</style>
             <Button
               onClick={() => setActiveFilter("none")}
               size="sm"
@@ -985,17 +985,17 @@ export default function CameraApp() {
 
                 {/* Switch Camera Button */}
                 {/*                   <Button
-          onClick={switchCamera}
-          size="lg"
-          variant="outline"
-          className={`rounded-full w-16 h-16 flex items-center justify-center ${
-            !hasPermission || !isActive ? "invisible" : ""
-          }`}
-          disabled={!hasPermission || !isActive}
-        >
-          <FlipCamera className="w-6 h-6" />
-          <span className="sr-only">Switch Camera</span>
-        </Button> */}
+        onClick={switchCamera}
+        size="lg"
+        variant="outline"
+        className={`rounded-full w-16 h-16 flex items-center justify-center ${
+          !hasPermission || !isActive ? "invisible" : ""
+        }`}
+        disabled={!hasPermission || !isActive}
+      >
+        <FlipCamera className="w-6 h-6" />
+        <span className="sr-only">Switch Camera</span>
+      </Button> */}
               </>
             ) : (
               <>
