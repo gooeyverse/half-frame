@@ -821,7 +821,7 @@ export default function CameraApp() {
           </Button>
         </div>
       )}
-      <div className="flex flex-row items-center justify-center gap-8 p-4 h-full">
+      <div className="flex flex-row items-center gap-8 p-4 h-full w-full">
         {/* Filter Selection Buttons */}
         {hasPermission && isActive && !capturedPhoto && (
           <div
