@@ -821,7 +821,7 @@ export default function CameraApp() {
           </Button>
         </div>
       )}
-      <div className="flex flex-row items-center gap-8 p-4 h-full w-1/2">
+      <div className="flex flex-row items-center gap-8 p-4 h-full">
         {/* Filter Selection Buttons */}
         {hasPermission && isActive && !capturedPhoto && (
           <div
@@ -835,10 +835,10 @@ export default function CameraApp() {
             }}
           >
             <style jsx>{`
-      div::-webkit-scrollbar {
-        display: none;
-      }
-    `}</style>
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
             <Button
               onClick={() => setActiveFilter("none")}
               size="sm"
@@ -959,6 +959,10 @@ export default function CameraApp() {
                     {isActive && <canvas ref={liveCanvasRef} className="w-full h-full object-cover" />}
                     {/* Hidden canvas for capturing photos */}
                     <canvas ref={canvasRef} className="hidden" />
+
+                    {!isActive && !error && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black"></div>
+                    )}
                   </>
                 )}
               </div>
@@ -985,17 +989,17 @@ export default function CameraApp() {
 
                 {/* Switch Camera Button */}
                 {/*                   <Button
-        onClick={switchCamera}
-        size="lg"
-        variant="outline"
-        className={`rounded-full w-16 h-16 flex items-center justify-center ${
-          !hasPermission || !isActive ? "invisible" : ""
-        }`}
-        disabled={!hasPermission || !isActive}
-      >
-        <FlipCamera className="w-6 h-6" />
-        <span className="sr-only">Switch Camera</span>
-      </Button> */}
+            onClick={switchCamera}
+            size="lg"
+            variant="outline"
+            className={`rounded-full w-16 h-16 flex items-center justify-center ${
+              !hasPermission || !isActive ? "invisible" : ""
+            }`}
+            disabled={!hasPermission || !isActive}
+          >
+            <FlipCamera className="w-6 h-6" />
+            <span className="sr-only">Switch Camera</span>
+          </Button> */}
               </>
             ) : (
               <>
