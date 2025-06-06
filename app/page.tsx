@@ -6,7 +6,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { startLiveFilterPreview, rgbToHsl, hslToRgb, applyBoxBlur, applyHalation } from "@/utils/imageFilters"
 
-type FilterType = "none" | "pink" | "cyan" | "ilford" | "fuji" | "polaroid" | "halation" | "css-filter" | "chroma-leak"
+type FilterType =
+  | "none"
+  | "pink"
+  | "cyan"
+  | "ilford"
+  | "fuji"
+  | "polaroid"
+  | "halation"
+  | "css-filter"
+  | "chroma-leak"
+  | "red-light"
 
 export default function CameraApp() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null)
@@ -33,6 +43,7 @@ export default function CameraApp() {
       "halation",
       "css-filter",
       "chroma-leak",
+      "red-light",
     ]
     const randomIndex = Math.floor(Math.random() * filters.length)
     return filters[randomIndex]
@@ -253,8 +264,8 @@ export default function CameraApp() {
       context.putImageData(imageData, 0, 0)
 
       // Apply cyan overlay with multiply blend mode
-      context.globalCompositeOperation = "multiply"
       context.fillStyle = "rgba(0, 225, 250, 0.5)" // #00e1fa with 50% opacity
+      context.globalCompositeOperation = "multiply"
       context.fillRect(0, 0, width, height)
     } else if (filterType === "ilford") {
       // Ilford black and white film filter
@@ -499,6 +510,38 @@ export default function CameraApp() {
       edgeGradient.addColorStop(1, "rgba(255, 160, 100, 0)")
 
       context.fillStyle = edgeGradient
+      context.fillRect(0, 0, width, height)
+    } else if (filterType === "red-light") {
+      const imageData = context.getImageData(0, 0, width, height)
+      const data = imageData.data
+
+      for (let i = 0; i < data.length; i += 4) {
+        let r = data[i]
+        let g = data[i + 1]
+        let b = data[i + 2]
+
+        // Apply grayscale(100%)
+        const gray = r * 0.299 + g * 0.587 + b * 0.114
+        r = g = b = gray
+
+        // Apply brightness(106%)
+        r = Math.min(255, r * 1.06)
+        g = Math.min(255, g * 1.06)
+        b = Math.min(255, b * 1.06)
+
+        // Set the processed values
+        data[i] = r // R
+        data[i + 1] = g // G
+        data[i + 2] = b // B
+        // Alpha channel (data[i + 3]) remains unchanged
+      }
+
+      // Put the modified image data back
+      context.putImageData(imageData, 0, 0)
+
+      // Apply red overlay with multiply blend mode (#fa0000)
+      context.globalCompositeOperation = "multiply"
+      context.fillStyle = "rgba(250, 0, 0, 1)" // #fa0000 with 100% opacity
       context.fillRect(0, 0, width, height)
     }
 
@@ -864,6 +907,15 @@ export default function CameraApp() {
                 style={{ width: "100px", height: "32px" }}
               >
                 Chroma Leak
+              </Button>
+              <Button
+                onClick={() => setActiveFilter("red-light")}
+                size="sm"
+                variant={activeFilter === "red-light" ? "default" : "outline"}
+                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+                style={{ width: "100px", height: "32px" }}
+              >
+                Red Light
               </Button>
             </div>
           )}
