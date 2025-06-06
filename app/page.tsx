@@ -821,7 +821,7 @@ export default function CameraApp() {
           </Button>
         </div>
       )}
-      <div className="flex flex-row items-center gap-8 p-4 h-full">
+      <div className="flex flex-row items-center justify-center gap-8 p-4 h-full">
         {/* Filter Selection Buttons */}
         {hasPermission && isActive && !capturedPhoto && (
           <div
@@ -935,7 +935,7 @@ export default function CameraApp() {
         {/* Main content area - Centered */}
         <div className="flex flex-col items-center overflow-y-hidden flex-1">
           {/* Viewfinder */}
-          <Card className="w-full max-w-full overflow-hidden">
+          <Card className={`overflow-hidden ${!isActive ? "w-[30vw]" : "w-full max-w-full"}`}>
             <CardContent className="p-0">
               <div className="relative aspect-[3/4] w-full bg-black">
                 {error && (
