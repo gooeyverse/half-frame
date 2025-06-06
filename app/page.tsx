@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Camera, CameraIcon as FlipCamera, Download, X, Power } from "lucide-react"
+import { Camera, Download, X, Power } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { startLiveFilterPreview, rgbToHsl, hslToRgb, applyBoxBlur, applyHalation } from "@/utils/imageFilters"
@@ -764,8 +764,8 @@ export default function CameraApp() {
   }, [isActive])
 
   return (
-    <div className="w-full h-screen bg-gray-100 overflow-hidden">
-      <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full min-h-screen bg-gray-100 overflow-hidden">
+      <div className="w-full flex-grow flex items-center justify-center">
         <div className="flex items-center justify-center relative">
           {/* Filter Selection Buttons - Positioned to the left */}
           {hasPermission && isActive && !capturedPhoto && (
@@ -935,7 +935,7 @@ export default function CameraApp() {
                   </Button>
 
                   {/* Switch Camera Button */}
-{/*                   <Button
+                  {/*                   <Button
                     onClick={switchCamera}
                     size="lg"
                     variant="outline"
