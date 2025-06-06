@@ -807,223 +807,222 @@ export default function CameraApp() {
   }, [isActive])
 
   return (
-    <div className="w-full min-h-screen bg-gray-100 overflow-hidden">
-      <div className="w-full flex-grow flex items-center justify-center">
-        <div className="flex items-center justify-center relative">
-          {/* Filter Selection Buttons - Positioned to the left */}
-          {hasPermission && isActive && !capturedPhoto && (
-            <div
-              className="fixed left-4 top-1/2 transform -translate-y-1/2 flex flex-col items-center overflow-y-auto overflow-x-hidden p-6 z-10"
-              style={{
-                gap: "75px",
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-                maxHeight: "calc(100vh - 2rem)",
-                width: "48px",
-              }}
+    <div className="w-full min-h-screen bg-gray-100 flex items-center justify-center p-4 overflow-auto">
+      <div className="flex flex-col md:flex-row items-center justify-center gap-8 p-4">
+        {/* Filter Selection Buttons - Positioned to the left */}
+        {hasPermission && isActive && !capturedPhoto && (
+          <div
+            className="md:mr-4 flex flex-col items-center overflow-y-auto overflow-x-hidden p-6 flex-shrink-0"
+            style={{
+              gap: "75px",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              maxHeight: "calc(100% - 2rem)",
+              mdmaxHeight: "calc(100vh - 2rem)",
+              width: "48px",
+            }}
+          >
+            <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+            <Button
+              onClick={() => setActiveFilter("none")}
+              size="sm"
+              variant={activeFilter === "none" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
             >
-              <style jsx>{`
-                div::-webkit-scrollbar {
-                  display: none;
-                }
-              `}</style>
-              <Button
-                onClick={() => setActiveFilter("none")}
-                size="sm"
-                variant={activeFilter === "none" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                No Filter
-              </Button>
-              <Button
-                onClick={() => setActiveFilter("pink")}
-                size="sm"
-                variant={activeFilter === "pink" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                Pink
-              </Button>
-              <Button
-                onClick={() => setActiveFilter("cyan")}
-                size="sm"
-                variant={activeFilter === "cyan" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                Cyan
-              </Button>
-              <Button
-                onClick={() => setActiveFilter("ilford")}
-                size="sm"
-                variant={activeFilter === "ilford" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                Ilford B&W
-              </Button>
-              <Button
-                onClick={() => setActiveFilter("fuji")}
-                size="sm"
-                variant={activeFilter === "fuji" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                Fuji Disposable
-              </Button>
-              <Button
-                onClick={() => setActiveFilter("polaroid")}
-                size="sm"
-                variant={activeFilter === "polaroid" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                Polaroid
-              </Button>
-              <Button
-                onClick={() => setActiveFilter("halation")}
-                size="sm"
-                variant={activeFilter === "halation" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                Halation
-              </Button>
-              <Button
-                onClick={() => setActiveFilter("css-filter")}
-                size="sm"
-                variant={activeFilter === "css-filter" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                Cool Blue
-              </Button>
-              <Button
-                onClick={() => setActiveFilter("chroma-leak")}
-                size="sm"
-                variant={activeFilter === "chroma-leak" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                Chroma Leak
-              </Button>
-              <Button
-                onClick={() => setActiveFilter("red-light")}
-                size="sm"
-                variant={activeFilter === "red-light" ? "default" : "outline"}
-                className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
-                style={{ width: "100px", height: "32px" }}
-              >
-                Red Light
-              </Button>
-            </div>
-          )}
+              No Filter
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("pink")}
+              size="sm"
+              variant={activeFilter === "pink" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Pink
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("cyan")}
+              size="sm"
+              variant={activeFilter === "cyan" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Cyan
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("ilford")}
+              size="sm"
+              variant={activeFilter === "ilford" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Ilford B&W
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("fuji")}
+              size="sm"
+              variant={activeFilter === "fuji" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Fuji Disposable
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("polaroid")}
+              size="sm"
+              variant={activeFilter === "polaroid" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Polaroid
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("halation")}
+              size="sm"
+              variant={activeFilter === "halation" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Halation
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("css-filter")}
+              size="sm"
+              variant={activeFilter === "css-filter" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Cool Blue
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("chroma-leak")}
+              size="sm"
+              variant={activeFilter === "chroma-leak" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Chroma Leak
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("red-light")}
+              size="sm"
+              variant={activeFilter === "red-light" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Red Light
+            </Button>
+          </div>
+        )}
 
-          {/* Main content area - Centered */}
-          <div className="flex flex-col items-center overflow-y-hidden">
-            {/* Viewfinder */}
-            <Card className="w-full max-w-sm overflow-hidden">
-              <CardContent className="p-0">
-                <div className="relative aspect-[3/4] w-full bg-black">
-                  {error && (
-                    <div className="absolute inset-0 flex items-center justify-center text-white bg-black/80 p-4 text-center">
-                      <p>{error}</p>
-                    </div>
-                  )}
-
-                  {capturedPhoto ? (
-                    <img
-                      src={capturedPhoto || "/placeholder.svg"}
-                      alt="Captured photo"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <>
-                      {/* Hidden video element used as source */}
-                      <video ref={videoRef} autoPlay playsInline muted className="hidden" />
-
-                      {/* Canvas for live preview with filter */}
-                      {isActive && <canvas ref={liveCanvasRef} className="w-full h-full object-cover" />}
-                      {/* Hidden canvas for capturing photos */}
-                      <canvas ref={canvasRef} className="hidden" />
-
-                      {!isActive && !error && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black"></div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Control buttons */}
-            <div className="flex gap-4 mt-6">
-              {!capturedPhoto ? (
-                <>
-                  <div className="relative">
-                    <Button
-                      onClick={toggleCamera}
-                      size="lg"
-                      className={`rounded-full w-16 h-16 flex items-center justify-center bg-white text-black border-2 ${isActive ? "border-green-500" : "border-black"} hover:bg-gray-100`}
-                    >
-                      <Power className="w-6 h-6" />
-                      <span className="sr-only">{isActive ? "Stop Camera" : "Start Camera"}</span>
-                    </Button>
+        {/* Main content area - Centered */}
+        <div className="flex flex-col items-center overflow-y-hidden">
+          {/* Viewfinder */}
+          <Card className="w-full max-w-sm overflow-hidden flex-shrink-0">
+            <CardContent className="p-0">
+              <div className="relative aspect-[3/4] w-full bg-black">
+                {error && (
+                  <div className="absolute inset-0 flex items-center justify-center text-white bg-black/80 p-4 text-center">
+                    <p>{error}</p>
                   </div>
+                )}
 
-                  {/* Capture Photo Button */}
-                  <Button
-                    onClick={capturePhoto}
-                    size="lg"
-                    variant="default"
-                    className={`rounded-full w-16 h-16 flex items-center justify-center bg-white text-black hover:bg-gray-100 ${
-                      !hasPermission || !isActive ? "invisible" : ""
-                    }`}
-                    disabled={isCapturing || !hasPermission || !isActive}
-                  >
-                    <Camera className="w-6 h-6" />
-                    <span className="sr-only">Capture Photo</span>
-                  </Button>
+                {capturedPhoto ? (
+                  <img
+                    src={capturedPhoto || "/placeholder.svg"}
+                    alt="Captured photo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <>
+                    {/* Hidden video element used as source */}
+                    <video ref={videoRef} autoPlay playsInline muted className="hidden" />
 
-                  {/* Switch Camera Button */}
-                  {/*                   <Button
-                    onClick={switchCamera}
-                    size="lg"
-                    variant="outline"
-                    className={`rounded-full w-16 h-16 flex items-center justify-center ${
-                      !hasPermission || !isActive ? "invisible" : ""
-                    }`}
-                    disabled={!hasPermission || !isActive}
-                  >
-                    <FlipCamera className="w-6 h-6" />
-                    <span className="sr-only">Switch Camera</span>
-                  </Button> */}
-                </>
-              ) : (
-                <>
-                  <Button
-                    onClick={clearPhoto}
-                    size="lg"
-                    variant="outline"
-                    className="rounded-full w-16 h-16 flex items-center justify-center"
-                  >
-                    <X className="w-6 h-6" />
-                    <span className="sr-only">Clear Photo</span>
-                  </Button>
+                    {/* Canvas for live preview with filter */}
+                    {isActive && <canvas ref={liveCanvasRef} className="w-full h-full object-cover" />}
+                    {/* Hidden canvas for capturing photos */}
+                    <canvas ref={canvasRef} className="hidden" />
 
+                    {!isActive && !error && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black"></div>
+                    )}
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Control buttons */}
+          <div className="flex gap-4 mt-6">
+            {!capturedPhoto ? (
+              <>
+                <div className="relative">
                   <Button
-                    onClick={downloadPhoto}
+                    onClick={toggleCamera}
                     size="lg"
-                    variant="default"
-                    className="rounded-full w-16 h-16 flex items-center justify-center bg-green-600 hover:bg-green-700"
+                    className={`rounded-full w-16 h-16 flex items-center justify-center bg-white text-black border-2 ${isActive ? "border-green-500" : "border-black"} hover:bg-gray-100`}
                   >
-                    <Download className="w-6 h-6" />
-                    <span className="sr-only">Download Photo</span>
+                    <Power className="w-6 h-6" />
+                    <span className="sr-only">{isActive ? "Stop Camera" : "Start Camera"}</span>
                   </Button>
-                </>
-              )}
-            </div>
+                </div>
+
+                {/* Capture Photo Button */}
+                <Button
+                  onClick={capturePhoto}
+                  size="lg"
+                  variant="default"
+                  className={`rounded-full w-16 h-16 flex items-center justify-center bg-white text-black hover:bg-gray-100 ${
+                    !hasPermission || !isActive ? "invisible" : ""
+                  }`}
+                  disabled={isCapturing || !hasPermission || !isActive}
+                >
+                  <Camera className="w-6 h-6" />
+                  <span className="sr-only">Capture Photo</span>
+                </Button>
+
+                {/* Switch Camera Button */}
+                {/*                   <Button
+                onClick={switchCamera}
+                size="lg"
+                variant="outline"
+                className={`rounded-full w-16 h-16 flex items-center justify-center ${
+                  !hasPermission || !isActive ? "invisible" : ""
+                }`}
+                disabled={!hasPermission || !isActive}
+              >
+                <FlipCamera className="w-6 h-6" />
+                <span className="sr-only">Switch Camera</span>
+              </Button> */}
+              </>
+            ) : (
+              <>
+                <Button
+                  onClick={clearPhoto}
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full w-16 h-16 flex items-center justify-center"
+                >
+                  <X className="w-6 h-6" />
+                  <span className="sr-only">Clear Photo</span>
+                </Button>
+
+                <Button
+                  onClick={downloadPhoto}
+                  size="lg"
+                  variant="default"
+                  className="rounded-full w-16 h-16 flex items-center justify-center bg-green-600 hover:bg-green-700"
+                >
+                  <Download className="w-6 h-6" />
+                  <span className="sr-only">Download Photo</span>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
