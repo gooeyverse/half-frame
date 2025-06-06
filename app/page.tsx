@@ -935,7 +935,7 @@ export default function CameraApp() {
         {/* Main content area - Centered */}
         <div className="flex flex-col items-center overflow-y-hidden flex-1">
           {/* Viewfinder */}
-          <Card className={`overflow-hidden ${!isActive ? "w-[30vw]" : "w-full max-w-full"}`}>
+          <Card className={`overflow-hidden ${!isActive ? "w-[50vw] max-w-56" : "w-full max-w-full"}`}>
             <CardContent className="p-0">
               <div className="relative aspect-[3/4] w-full bg-black">
                 {error && (
