@@ -807,7 +807,7 @@ export default function CameraApp() {
   }, [isActive])
 
   return (
-    <div className="w-full min-h-screen bg-gray-100 flex items-center justify-center p-4 overflow-auto">
+    <div className="w-full h-[90vh] bg-gray-100 flex items-center justify-center p-4 overflow-auto">
       <div className="flex flex-col md:flex-row items-center justify-center gap-8 p-4">
         {/* Filter Selection Buttons - Positioned to the left */}
         {hasPermission && isActive && !capturedPhoto && (
@@ -823,10 +823,10 @@ export default function CameraApp() {
             }}
           >
             <style jsx>{`
-            div::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
             <Button
               onClick={() => setActiveFilter("none")}
               size="sm"
@@ -988,17 +988,17 @@ export default function CameraApp() {
 
                 {/* Switch Camera Button */}
                 {/*                   <Button
-                onClick={switchCamera}
-                size="lg"
-                variant="outline"
-                className={`rounded-full w-16 h-16 flex items-center justify-center ${
-                  !hasPermission || !isActive ? "invisible" : ""
-                }`}
-                disabled={!hasPermission || !isActive}
-              >
-                <FlipCamera className="w-6 h-6" />
-                <span className="sr-only">Switch Camera</span>
-              </Button> */}
+              onClick={switchCamera}
+              size="lg"
+              variant="outline"
+              className={`rounded-full w-16 h-16 flex items-center justify-center ${
+                !hasPermission || !isActive ? "invisible" : ""
+              }`}
+              disabled={!hasPermission || !isActive}
+            >
+              <FlipCamera className="w-6 h-6" />
+              <span className="sr-only">Switch Camera</span>
+            </Button> */}
               </>
             ) : (
               <>
