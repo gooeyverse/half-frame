@@ -574,7 +574,7 @@ export default function CameraApp() {
 
     // Explicitly set canvas dimensions to match the desired 3:4 aspect ratio
     // based on the max-w-sm (384px) of the parent Card.
-    const desiredWidth = 384 // max-w-sm is 24rem = 384px
+    const desiredWidth = 224 // max-w-sm is 24rem = 384px
     const desiredHeight = (desiredWidth / 3) * 4 // 3:4 aspect ratio
 
     canvas.width = desiredWidth
