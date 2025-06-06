@@ -770,7 +770,7 @@ export default function CameraApp() {
           {/* Filter Selection Buttons - Positioned to the left */}
           {hasPermission && isActive && !capturedPhoto && (
             <div
-              className="relative left-4 top-1/2 transform -translate-y-1/2 flex flex-col items-center overflow-y-auto overflow-x-hidden p-6 z-10"
+              className="fixed left-4 top-1/2 transform -translate-y-1/2 flex flex-col items-center overflow-y-auto overflow-x-hidden p-6 z-10"
               style={{
                 gap: "75px",
                 scrollbarWidth: "none",
