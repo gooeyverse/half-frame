@@ -808,6 +808,19 @@ export default function CameraApp() {
 
   return (
     <div className="w-full h-[95vh] flex items-center justify-center p-4 overflow-auto">
+      {/* Power Button */}
+      {!capturedPhoto && (
+        <div className="absolute top-4 right-4 z-10">
+          <Button
+            onClick={toggleCamera}
+            size="lg"
+            className={`rounded-full w-16 h-16 flex items-center justify-center bg-white text-black border-2 ${isActive ? "border-green-500" : "border-black"} hover:bg-gray-100`}
+          >
+            <Power className="w-6 h-6" />
+            <span className="sr-only">{isActive ? "Stop Camera" : "Start Camera"}</span>
+          </Button>
+        </div>
+      )}
       <div className="flex flex-row items-center justify-center gap-8 p-4 h-full">
         {/* Filter Selection Buttons */}
         {hasPermission && isActive && !capturedPhoto && (
@@ -960,17 +973,6 @@ export default function CameraApp() {
           <div className="flex gap-4 mt-6">
             {!capturedPhoto ? (
               <>
-                <div className="relative">
-                  <Button
-                    onClick={toggleCamera}
-                    size="lg"
-                    className={`rounded-full w-16 h-16 flex items-center justify-center bg-white text-black border-2 ${isActive ? "border-green-500" : "border-black"} hover:bg-gray-100`}
-                  >
-                    <Power className="w-6 h-6" />
-                    <span className="sr-only">{isActive ? "Stop Camera" : "Start Camera"}</span>
-                  </Button>
-                </div>
-
                 {/* Capture Photo Button */}
                 <Button
                   onClick={capturePhoto}
