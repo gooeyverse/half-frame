@@ -20,6 +20,7 @@ type FilterType =
   | "chroma-leak"
   | "red-light"
   | "mist"
+  | "fever" // Added new filter type
 
 // Define the fixed resolution for the SAVED image
 const SAVED_IMAGE_RESOLUTION = { width: 720, height: 960 }
@@ -43,6 +44,7 @@ export default function CameraApp() {
 
   const getRandomFilter = (): FilterType => {
     const filters: FilterType[] = [
+      "none",
       "pink",
       "cyan",
       "ilford",
@@ -53,6 +55,7 @@ export default function CameraApp() {
       "chroma-leak",
       "red-light",
       "mist",
+      "fever", // Added new filter to random selection
     ]
     const randomIndex = Math.floor(Math.random() * filters.length)
     return filters[randomIndex]
@@ -637,6 +640,47 @@ export default function CameraApp() {
       context.globalCompositeOperation = "overlay"
       context.fillStyle = "rgba(255, 248, 240, 0.05)" // Very subtle warm overlay
       context.fillRect(0, 0, width, height)
+    } else if (filterType === "fever") {
+      const imageData = context.getImageData(0, 0, width, height)
+      const data = imageData.data
+
+      for (let i = 0; i < data.length; i += 4) {
+        let r = data[i]
+        let g = data[i + 1]
+        let b = data[i + 2]
+
+        // Apply contrast(97%)
+        const contrast = 0.97
+        r = Math.min(255, Math.max(0, (r - 128) * contrast + 128))
+        g = Math.min(255, Math.max(0, (g - 128) * contrast + 128))
+        b = Math.min(255, Math.max(0, (b - 128) * contrast + 128))
+
+        // Convert to HSL for hue rotation and saturation
+        const hsl = rgbToHsl(r, g, b)
+
+        // Apply hue-rotate(330deg)
+        hsl[0] = (hsl[0] + 330 / 360) % 1
+
+        // Apply saturate(111%)
+        hsl[1] = Math.min(1, hsl[1] * 1.11)
+
+        // Convert back to RGB
+        const [newR, newG, newB] = hslToRgb(hsl[0], hsl[1], hsl[2])
+
+        // Set the processed values
+        data[i] = newR // R
+        data[i + 1] = newG // G
+        data[i + 2] = newB // B
+        // Alpha channel (data[i + 3]) remains unchanged
+      }
+
+      // Put the modified image data back
+      context.putImageData(imageData, 0, 0)
+
+      // Apply red overlay with multiply blend mode (#ff0000 at 13% opacity)
+      context.globalCompositeOperation = "multiply"
+      context.fillStyle = "rgba(255, 0, 0, 0.13)" // #ff0000 with 13% opacity
+      context.fillRect(0, 0, width, height)
     }
 
     // Reset composite operation
@@ -1058,6 +1102,15 @@ export default function CameraApp() {
               style={{ width: "100px", height: "32px" }}
             >
               Mist
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("fever")}
+              size="sm"
+              variant={activeFilter === "fever" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Fever
             </Button>
           </div>
         )}
