@@ -719,15 +719,15 @@ export default function CameraApp() {
         let [expiredR, expiredG, expiredB] = hslToRgb(hsl[0], hsl[1], hsl[2])
 
         // Apply additional color shifts characteristic of expired film
-        // Boost cyan/green channels more
-        expiredG = Math.min(255, expiredG * 1.15)
-        expiredB = Math.min(255, expiredB * 1.1)
+        // Boost cyan/green channels (toned down slightly)
+        expiredG = Math.min(255, expiredG * 1.08)
+        expiredB = Math.min(255, expiredB * 1.05)
         expiredR = Math.max(0, expiredR * 0.9)
 
         // Add film grain (more pronounced in expired film)
-        expiredR = addFilmGrain(expiredR, x, y, 15)
-        expiredG = addFilmGrain(expiredG, x, y, 15)
-        expiredB = addFilmGrain(expiredB, x, y, 15)
+        expiredR = addFilmGrain(expiredR, x, y, 20)
+        expiredG = addFilmGrain(expiredG, x, y, 20)
+        expiredB = addFilmGrain(expiredB, x, y, 20)
 
         // Apply subtle vignetting
         expiredR = applyVignetting(expiredR, x, y, width, height, 0.2)
@@ -743,24 +743,35 @@ export default function CameraApp() {
       // Put the modified image data back
       context.putImageData(imageData, 0, 0)
 
-      // Apply a cyan/teal overlay to enhance the expired film look
-      context.globalCompositeOperation = "overlay"
-      context.fillStyle = "rgba(100, 200, 180, 0.15)" // Cyan-teal overlay
-      context.fillRect(0, 0, width, height)
-
-      // Add subtle light leaks (common in expired film)
+      // Add random orange light leaks (common in expired film)
       context.globalCompositeOperation = "screen"
 
-      // Create random light leak effects
-      const leaks = [
-        { x: width * 0.05, y: height * 0.1, size: width * 0.2, color: "rgba(150, 255, 200, 0.1)" },
-        { x: width * 0.9, y: height * 0.8, size: width * 0.15, color: "rgba(200, 255, 220, 0.08)" },
+      // Create random orange light leak effects
+      const orangeLeaks = [
+        {
+          x: width * (0.1 + Math.random() * 0.3),
+          y: height * (0.1 + Math.random() * 0.3),
+          size: width * (0.15 + Math.random() * 0.1),
+          color: "rgba(255, 140, 60, 0.12)",
+        },
+        {
+          x: width * (0.6 + Math.random() * 0.3),
+          y: height * (0.6 + Math.random() * 0.3),
+          size: width * (0.1 + Math.random() * 0.15),
+          color: "rgba(255, 180, 100, 0.08)",
+        },
+        {
+          x: width * (0.05 + Math.random() * 0.2),
+          y: height * (0.7 + Math.random() * 0.2),
+          size: width * (0.12 + Math.random() * 0.08),
+          color: "rgba(255, 160, 80, 0.1)",
+        },
       ]
 
-      leaks.forEach((leak) => {
+      orangeLeaks.forEach((leak) => {
         const gradient = context.createRadialGradient(leak.x, leak.y, 0, leak.x, leak.y, leak.size)
         gradient.addColorStop(0, leak.color)
-        gradient.addColorStop(0.7, leak.color.replace(/0\.\d+\)$/, "0.02)"))
+        gradient.addColorStop(0.6, leak.color.replace(/0\.\d+\)$/, "0.02)"))
         gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
 
         context.fillStyle = gradient
@@ -965,7 +976,7 @@ export default function CameraApp() {
         })
       } else {
         // Fallback for devices that don't support Web Share API
-        const url = URL.createObjectURL(blob)
+        const url = capturedPhoto
         const link = document.createElement("a")
         link.href = url
         link.download = filename
@@ -974,9 +985,6 @@ export default function CameraApp() {
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-
-        // Clean up
-        URL.revokeObjectURL(url)
       }
     } catch (error) {
       console.error("Error saving photo:", error)
