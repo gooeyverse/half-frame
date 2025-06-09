@@ -5,7 +5,8 @@ import { Camera, Download, X, Power } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { startLiveFilterPreview, rgbToHsl, hslToRgb, applyBoxBlur, applyHalation } from "@/utils/imageFilters"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// Removed Select imports as it's no longer needed
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type FilterType =
   | "none"
@@ -19,13 +20,8 @@ type FilterType =
   | "chroma-leak"
   | "red-light"
 
-// Define available resolutions for the SAVED image with a 3:4 aspect ratio
-const RESOLUTIONS = [
-  { label: "SD (480x640)", width: 480, height: 640 },
-  { label: "HD (720x960)", width: 720, height: 960 },
-  { label: "Full HD (1080x1440)", width: 1080, height: 1440 },
-  { label: "2K (1440x1920)", width: 1440, height: 1920 },
-]
+// Define the fixed resolution for the SAVED image
+const SAVED_IMAGE_RESOLUTION = { width: 720, height: 960 }
 
 export default function CameraApp() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null)
@@ -41,8 +37,8 @@ export default function CameraApp() {
   const animationFrameRef = useRef<number | null>(null)
   const [activeFilter, setActiveFilter] = useState<FilterType>("none")
   const filterInitializedRef = useRef(false)
-  // Default to a higher resolution for saved images, but the camera will try to provide the best it can.
-  const [selectedResolution, setSelectedResolution] = useState(RESOLUTIONS[2]) // Default to Full HD (1080x1440) for saved image
+  // The saved image resolution is now fixed to HD
+  const selectedResolution = SAVED_IMAGE_RESOLUTION
 
   const getRandomFilter = (): FilterType => {
     const filters: FilterType[] = [
@@ -68,8 +64,8 @@ export default function CameraApp() {
       const constraints = {
         video: {
           facingMode,
-          width: { ideal: RESOLUTIONS[RESOLUTIONS.length - 1].width }, // Request max width
-          height: { ideal: RESOLUTIONS[RESOLUTIONS.length - 1].height }, // Request max height
+          width: { ideal: 1920 }, // Request max width (e.g., 1920 for 1920x2560)
+          height: { ideal: 2560 }, // Request max height
           aspectRatio: { ideal: 3 / 4 }, // Maintain aspect ratio for the raw stream
         },
       }
@@ -695,9 +691,9 @@ export default function CameraApp() {
 
       if (!context) return
 
-      // Set capture canvas to the selected resolution for the saved image
-      canvas.width = selectedResolution.width
-      canvas.height = selectedResolution.height
+      // Set capture canvas to the fixed HD resolution for the saved image
+      canvas.width = SAVED_IMAGE_RESOLUTION.width
+      canvas.height = SAVED_IMAGE_RESOLUTION.height
 
       // Calculate 3:4 aspect ratio dimensions for cropping from the video stream
       const videoWidth = video.videoWidth
@@ -843,7 +839,7 @@ export default function CameraApp() {
     }
   }, [isActive])
 
-  // Effect to handle camera restart when facingMode changes (selectedResolution now only affects capture canvas)
+  // Effect to handle camera restart when facingMode changes
   useEffect(() => {
     if (isActive) {
       stopCamera() // Stop the current stream
@@ -979,31 +975,12 @@ export default function CameraApp() {
 
         {/* Main content area - Centered */}
         <div className="flex flex-col items-center overflow-y-hidden flex-1">
-          {/* Resolution Display and Selector */}
+          {/* Resolution Display (now fixed) */}
           {isActive && !capturedPhoto && (
             <div className="flex items-center gap-4 mb-4">
-              <span className="text-sm font-medium">Saved Image Resolution:</span>
-              <Select
-                value={`${selectedResolution.width}x${selectedResolution.height}`}
-                onValueChange={(value) => {
-                  const [width, height] = value.split("x").map(Number)
-                  const newResolution = RESOLUTIONS.find((res) => res.width === width && res.height === height)
-                  if (newResolution) {
-                    setSelectedResolution(newResolution)
-                  }
-                }}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select resolution" />
-                </SelectTrigger>
-                <SelectContent>
-                  {RESOLUTIONS.map((res) => (
-                    <SelectItem key={`${res.width}x${res.height}`} value={`${res.width}x${res.height}`}>
-                      {res.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <span className="text-sm font-medium">
+                Saved Image Resolution: {SAVED_IMAGE_RESOLUTION.width}x{SAVED_IMAGE_RESOLUTION.height} (HD)
+              </span>
             </div>
           )}
 
@@ -1030,7 +1007,7 @@ export default function CameraApp() {
 
                     {/* Canvas for live preview with filter (fixed 480x640) */}
                     {isActive && <canvas ref={liveCanvasRef} className="w-full h-full object-cover" />}
-                    {/* Hidden canvas for capturing photos (dynamic resolution) */}
+                    {/* Hidden canvas for capturing photos (fixed HD resolution) */}
                     <canvas ref={canvasRef} className="hidden" />
 
                     {!isActive && !error && (
