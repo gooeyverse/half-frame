@@ -19,11 +19,12 @@ type FilterType =
   | "chroma-leak"
   | "red-light"
 
-// Define available resolutions with a 3:4 aspect ratio
+// Define available resolutions for the SAVED image with a 3:4 aspect ratio
 const RESOLUTIONS = [
   { label: "SD (480x640)", width: 480, height: 640 },
   { label: "HD (720x960)", width: 720, height: 960 },
   { label: "Full HD (1080x1440)", width: 1080, height: 1440 },
+  { label: "2K (1440x1920)", width: 1440, height: 1920 },
 ]
 
 export default function CameraApp() {
@@ -34,13 +35,14 @@ export default function CameraApp() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const [isCapturing, setIsCapturing] = useState(false)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const liveCanvasRef = useRef<HTMLCanvasElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null) // Canvas for captured photo
+  const liveCanvasRef = useRef<HTMLCanvasElement>(null) // Canvas for live preview
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null)
   const animationFrameRef = useRef<number | null>(null)
   const [activeFilter, setActiveFilter] = useState<FilterType>("none")
   const filterInitializedRef = useRef(false)
-  const [selectedResolution, setSelectedResolution] = useState(RESOLUTIONS[1]) // Default to HD (720x960)
+  // Default to a higher resolution for saved images, but the camera will try to provide the best it can.
+  const [selectedResolution, setSelectedResolution] = useState(RESOLUTIONS[2]) // Default to Full HD (1080x1440) for saved image
 
   const getRandomFilter = (): FilterType => {
     const filters: FilterType[] = [
@@ -61,11 +63,14 @@ export default function CameraApp() {
   const startCamera = async () => {
     try {
       setError(null)
+      // Request the highest possible resolution from the camera for the raw stream
+      // This ensures the best quality for the saved image, even if the preview is lower.
       const constraints = {
         video: {
           facingMode,
-          width: { ideal: selectedResolution.width }, // Use selected resolution for ideal width
-          height: { ideal: selectedResolution.height }, // Use selected resolution for ideal height
+          width: { ideal: RESOLUTIONS[RESOLUTIONS.length - 1].width }, // Request max width
+          height: { ideal: RESOLUTIONS[RESOLUTIONS.length - 1].height }, // Request max height
+          aspectRatio: { ideal: 3 / 4 }, // Maintain aspect ratio for the raw stream
         },
       }
 
@@ -597,7 +602,7 @@ export default function CameraApp() {
     let r, g, b
 
     if (s === 0) {
-      r = g = b = l
+      r = g = b = l // achromatic
     } else {
       const hue2rgb = (p: number, q: number, t: number) => {
         if (t < 0) t += 1
@@ -628,9 +633,9 @@ export default function CameraApp() {
 
     if (!context) return
 
-    // Set canvas dimensions to the selected resolution
-    canvas.width = selectedResolution.width
-    canvas.height = selectedResolution.height
+    // Set live preview canvas dimensions to fixed 480x640
+    canvas.width = 480
+    canvas.height = 640
 
     // Cancel any existing animation frame
     if (animationFrameRef.current) {
@@ -664,7 +669,7 @@ export default function CameraApp() {
       // Clear canvas
       context.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Draw the cropped video frame to canvas, scaling to the selected resolution
+      // Draw the cropped video frame to live preview canvas, scaling to 480x640
       context.drawImage(video, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height)
 
       // Apply filter
@@ -679,24 +684,47 @@ export default function CameraApp() {
   }
 
   const capturePhoto = async () => {
-    if (!liveCanvasRef.current || !canvasRef.current) return
+    if (!videoRef.current || !canvasRef.current) return
 
     setIsCapturing(true)
 
     try {
-      // We'll capture directly from the live canvas which already has the filter applied
-      const liveCanvas = liveCanvasRef.current
+      const video = videoRef.current
       const canvas = canvasRef.current
       const context = canvas.getContext("2d")
 
       if (!context) return
 
-      // Set capture canvas to the selected resolution for consistent quality
+      // Set capture canvas to the selected resolution for the saved image
       canvas.width = selectedResolution.width
       canvas.height = selectedResolution.height
 
-      // Draw the current filtered frame from live canvas to capture canvas
-      context.drawImage(liveCanvas, 0, 0, canvas.width, canvas.height) // Ensure it draws to the new size
+      // Calculate 3:4 aspect ratio dimensions for cropping from the video stream
+      const videoWidth = video.videoWidth
+      const videoHeight = video.videoHeight
+      const targetAspectRatio = 3 / 4
+
+      let sourceWidth, sourceHeight, sourceX, sourceY
+
+      if (videoWidth / videoHeight > targetAspectRatio) {
+        // Video is wider than 3:4, crop width
+        sourceHeight = videoHeight
+        sourceWidth = videoHeight * targetAspectRatio
+        sourceX = (videoWidth - sourceWidth) / 2
+        sourceY = 0
+      } else {
+        // Video is taller than 3:4, crop height
+        sourceWidth = videoWidth
+        sourceHeight = videoWidth / targetAspectRatio
+        sourceX = 0
+        sourceY = (videoHeight - sourceHeight) / 2
+      }
+
+      // Draw the cropped video frame directly from the video element to the capture canvas
+      context.drawImage(video, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height)
+
+      // Apply filter to the captured image
+      applyFilterToCanvas(context, canvas.width, canvas.height, activeFilter)
 
       // Convert canvas to data URL for preview
       const dataUrl = canvas.toDataURL("image/jpeg", 0.9)
@@ -815,21 +843,13 @@ export default function CameraApp() {
     }
   }, [isActive])
 
-  // Effect to handle camera restart when facingMode or selectedResolution changes
+  // Effect to handle camera restart when facingMode changes (selectedResolution now only affects capture canvas)
   useEffect(() => {
     if (isActive) {
-      // Only restart if camera is currently active
       stopCamera() // Stop the current stream
-      startCamera() // Start camera with new constraints (which will use the updated facingMode/selectedResolution)
+      startCamera() // Start camera with new constraints (which will use the updated facingMode)
     }
-  }, [facingMode, selectedResolution]) // Dependencies: facingMode and selectedResolution
-
-  // Restart live preview when filter changes (if camera is active and video is playing)
-  useEffect(() => {
-    if (isActive && videoRef.current && videoRef.current.readyState >= 2) {
-      startLiveFilterPreview()
-    }
-  }, [activeFilter, isActive]) // Dependencies: activeFilter and isActive
+  }, [facingMode]) // Only facingMode triggers camera restart now
 
   return (
     <div className="w-full h-[95vh] flex items-center justify-center p-4 overflow-auto">
@@ -962,7 +982,7 @@ export default function CameraApp() {
           {/* Resolution Display and Selector */}
           {isActive && !capturedPhoto && (
             <div className="flex items-center gap-4 mb-4">
-              <span className="text-sm font-medium">Resolution: {selectedResolution.label}</span>
+              <span className="text-sm font-medium">Saved Image Resolution:</span>
               <Select
                 value={`${selectedResolution.width}x${selectedResolution.height}`}
                 onValueChange={(value) => {
@@ -1008,9 +1028,9 @@ export default function CameraApp() {
                     {/* Hidden video element used as source */}
                     <video ref={videoRef} autoPlay playsInline muted className="hidden" />
 
-                    {/* Canvas for live preview with filter */}
+                    {/* Canvas for live preview with filter (fixed 480x640) */}
                     {isActive && <canvas ref={liveCanvasRef} className="w-full h-full object-cover" />}
-                    {/* Hidden canvas for capturing photos */}
+                    {/* Hidden canvas for capturing photos (dynamic resolution) */}
                     <canvas ref={canvasRef} className="hidden" />
 
                     {!isActive && !error && (
