@@ -20,7 +20,8 @@ type FilterType =
   | "chroma-leak"
   | "red-light"
   | "mist"
-  | "fever" // Added new filter type
+  | "fever"
+  | "expired-film"
 
 // Define the fixed resolution for the SAVED image
 const SAVED_IMAGE_RESOLUTION = { width: 720, height: 960 }
@@ -44,7 +45,6 @@ export default function CameraApp() {
 
   const getRandomFilter = (): FilterType => {
     const filters: FilterType[] = [
-      "none",
       "pink",
       "cyan",
       "ilford",
@@ -55,7 +55,8 @@ export default function CameraApp() {
       "chroma-leak",
       "red-light",
       "mist",
-      "fever", // Added new filter to random selection
+      "fever",
+      "expired-film",
     ]
     const randomIndex = Math.floor(Math.random() * filters.length)
     return filters[randomIndex]
@@ -681,6 +682,90 @@ export default function CameraApp() {
       context.globalCompositeOperation = "multiply"
       context.fillStyle = "rgba(255, 0, 0, 0.13)" // #ff0000 with 13% opacity
       context.fillRect(0, 0, width, height)
+    } else if (filterType === "expired-film") {
+      // Expired film filter - creates the characteristic cyan/teal color shift and degraded look
+      const imageData = context.getImageData(0, 0, width, height)
+      const data = imageData.data
+
+      for (let i = 0; i < data.length; i += 4) {
+        let r = data[i]
+        let g = data[i + 1]
+        let b = data[i + 2]
+
+        // Get pixel coordinates for grain and vignetting
+        const x = (i / 4) % width
+        const y = Math.floor(i / 4 / width)
+
+        // Apply significant contrast reduction (expired film loses contrast)
+        const contrast = 0.7
+        r = Math.min(255, Math.max(0, (r - 128) * contrast + 128))
+        g = Math.min(255, Math.max(0, (g - 128) * contrast + 128))
+        b = Math.min(255, Math.max(0, (b - 128) * contrast + 128))
+
+        // Convert to HSL for color manipulation
+        const hsl = rgbToHsl(r, g, b)
+
+        // Desaturate significantly (expired film loses saturation)
+        hsl[1] = Math.max(0, hsl[1] * 0.6)
+
+        // Shift hue toward cyan/teal (characteristic of expired film)
+        // This simulates the color layer degradation
+        hsl[0] = (hsl[0] + 0.15) % 1 // Shift toward cyan
+
+        // Slightly increase brightness to simulate the washed-out look
+        hsl[2] = Math.min(1, hsl[2] * 1.1)
+
+        // Convert back to RGB
+        let [expiredR, expiredG, expiredB] = hslToRgb(hsl[0], hsl[1], hsl[2])
+
+        // Apply additional color shifts characteristic of expired film
+        // Boost cyan/green channels more
+        expiredG = Math.min(255, expiredG * 1.15)
+        expiredB = Math.min(255, expiredB * 1.1)
+        expiredR = Math.max(0, expiredR * 0.9)
+
+        // Add film grain (more pronounced in expired film)
+        expiredR = addFilmGrain(expiredR, x, y, 15)
+        expiredG = addFilmGrain(expiredG, x, y, 15)
+        expiredB = addFilmGrain(expiredB, x, y, 15)
+
+        // Apply subtle vignetting
+        expiredR = applyVignetting(expiredR, x, y, width, height, 0.2)
+        expiredG = applyVignetting(expiredG, x, y, width, height, 0.2)
+        expiredB = applyVignetting(expiredB, x, y, width, height, 0.2)
+
+        // Set the processed values
+        data[i] = expiredR
+        data[i + 1] = expiredG
+        data[i + 2] = expiredB
+      }
+
+      // Put the modified image data back
+      context.putImageData(imageData, 0, 0)
+
+      // Apply a cyan/teal overlay to enhance the expired film look
+      context.globalCompositeOperation = "overlay"
+      context.fillStyle = "rgba(100, 200, 180, 0.15)" // Cyan-teal overlay
+      context.fillRect(0, 0, width, height)
+
+      // Add subtle light leaks (common in expired film)
+      context.globalCompositeOperation = "screen"
+
+      // Create random light leak effects
+      const leaks = [
+        { x: width * 0.05, y: height * 0.1, size: width * 0.2, color: "rgba(150, 255, 200, 0.1)" },
+        { x: width * 0.9, y: height * 0.8, size: width * 0.15, color: "rgba(200, 255, 220, 0.08)" },
+      ]
+
+      leaks.forEach((leak) => {
+        const gradient = context.createRadialGradient(leak.x, leak.y, 0, leak.x, leak.y, leak.size)
+        gradient.addColorStop(0, leak.color)
+        gradient.addColorStop(0.7, leak.color.replace(/0\.\d+\)$/, "0.02)"))
+        gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
+
+        context.fillStyle = gradient
+        context.fillRect(0, 0, width, height)
+      })
     }
 
     // Reset composite operation
@@ -1111,6 +1196,15 @@ export default function CameraApp() {
               style={{ width: "100px", height: "32px" }}
             >
               Fever
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("expired-film")}
+              size="sm"
+              variant={activeFilter === "expired-film" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Expired Film
             </Button>
           </div>
         )}
