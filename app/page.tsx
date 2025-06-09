@@ -5,6 +5,7 @@ import { Camera, Download, X, Power } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { startLiveFilterPreview, rgbToHsl, hslToRgb, applyBoxBlur, applyHalation } from "@/utils/imageFilters"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type FilterType =
   | "none"
@@ -17,6 +18,13 @@ type FilterType =
   | "css-filter"
   | "chroma-leak"
   | "red-light"
+
+// Define available resolutions with a 3:4 aspect ratio
+const RESOLUTIONS = [
+  { label: "SD (480x640)", width: 480, height: 640 },
+  { label: "HD (720x960)", width: 720, height: 960 },
+  { label: "Full HD (1080x1440)", width: 1080, height: 1440 },
+]
 
 export default function CameraApp() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null)
@@ -32,6 +40,7 @@ export default function CameraApp() {
   const animationFrameRef = useRef<number | null>(null)
   const [activeFilter, setActiveFilter] = useState<FilterType>("none")
   const filterInitializedRef = useRef(false)
+  const [selectedResolution, setSelectedResolution] = useState(RESOLUTIONS[1]) // Default to HD (720x960)
 
   const getRandomFilter = (): FilterType => {
     const filters: FilterType[] = [
@@ -53,7 +62,11 @@ export default function CameraApp() {
     try {
       setError(null)
       const constraints = {
-        video: { facingMode },
+        video: {
+          facingMode,
+          width: { ideal: selectedResolution.width }, // Use selected resolution for ideal width
+          height: { ideal: selectedResolution.height }, // Use selected resolution for ideal height
+        },
       }
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
@@ -615,13 +628,9 @@ export default function CameraApp() {
 
     if (!context) return
 
-    // Explicitly set canvas dimensions to match the desired 3:4 aspect ratio
-    // based on the max-w-sm (384px) of the parent Card.
-    const containerWidth = canvas.offsetWidth
-    const containerHeight = canvas.offsetHeight
-
-    canvas.width = containerWidth
-    canvas.height = containerHeight
+    // Set canvas dimensions to the selected resolution
+    canvas.width = selectedResolution.width
+    canvas.height = selectedResolution.height
 
     // Cancel any existing animation frame
     if (animationFrameRef.current) {
@@ -631,7 +640,7 @@ export default function CameraApp() {
     const drawFrame = () => {
       if (!video || !context || video.paused || video.ended) return
 
-      // Calculate 3:4 aspect ratio dimensions for cropping
+      // Calculate 3:4 aspect ratio dimensions for cropping from the video stream
       const videoWidth = video.videoWidth
       const videoHeight = video.videoHeight
       const targetAspectRatio = 3 / 4
@@ -655,7 +664,7 @@ export default function CameraApp() {
       // Clear canvas
       context.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Draw the cropped video frame to canvas
+      // Draw the cropped video frame to canvas, scaling to the selected resolution
       context.drawImage(video, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height)
 
       // Apply filter
@@ -682,12 +691,12 @@ export default function CameraApp() {
 
       if (!context) return
 
-      // Set capture canvas to same dimensions as live canvas for consistent quality
-      canvas.width = liveCanvas.width
-      canvas.height = liveCanvas.height
+      // Set capture canvas to the selected resolution for consistent quality
+      canvas.width = selectedResolution.width
+      canvas.height = selectedResolution.height
 
       // Draw the current filtered frame from live canvas to capture canvas
-      context.drawImage(liveCanvas, 0, 0)
+      context.drawImage(liveCanvas, 0, 0, canvas.width, canvas.height) // Ensure it draws to the new size
 
       // Convert canvas to data URL for preview
       const dataUrl = canvas.toDataURL("image/jpeg", 0.9)
@@ -805,6 +814,22 @@ export default function CameraApp() {
       }
     }
   }, [isActive])
+
+  // Effect to handle camera restart when facingMode or selectedResolution changes
+  useEffect(() => {
+    if (isActive) {
+      // Only restart if camera is currently active
+      stopCamera() // Stop the current stream
+      startCamera() // Start camera with new constraints (which will use the updated facingMode/selectedResolution)
+    }
+  }, [facingMode, selectedResolution]) // Dependencies: facingMode and selectedResolution
+
+  // Restart live preview when filter changes (if camera is active and video is playing)
+  useEffect(() => {
+    if (isActive && videoRef.current && videoRef.current.readyState >= 2) {
+      startLiveFilterPreview()
+    }
+  }, [activeFilter, isActive]) // Dependencies: activeFilter and isActive
 
   return (
     <div className="w-full h-[95vh] flex items-center justify-center p-4 overflow-auto">
@@ -934,6 +959,34 @@ export default function CameraApp() {
 
         {/* Main content area - Centered */}
         <div className="flex flex-col items-center overflow-y-hidden flex-1">
+          {/* Resolution Display and Selector */}
+          {isActive && !capturedPhoto && (
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-sm font-medium">Resolution: {selectedResolution.label}</span>
+              <Select
+                value={`${selectedResolution.width}x${selectedResolution.height}`}
+                onValueChange={(value) => {
+                  const [width, height] = value.split("x").map(Number)
+                  const newResolution = RESOLUTIONS.find((res) => res.width === width && res.height === height)
+                  if (newResolution) {
+                    setSelectedResolution(newResolution)
+                  }
+                }}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select resolution" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RESOLUTIONS.map((res) => (
+                    <SelectItem key={`${res.width}x${res.height}`} value={`${res.width}x${res.height}`}>
+                      {res.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {/* Viewfinder */}
           <Card className={`overflow-hidden ${!isActive ? "w-[50vw] max-w-56" : "w-full max-w-full"}`}>
             <CardContent className="p-0">
