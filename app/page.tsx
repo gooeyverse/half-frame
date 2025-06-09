@@ -19,6 +19,7 @@ type FilterType =
   | "css-filter"
   | "chroma-leak"
   | "red-light"
+  | "mist"
 
 // Define the fixed resolution for the SAVED image
 const SAVED_IMAGE_RESOLUTION = { width: 720, height: 960 }
@@ -51,6 +52,7 @@ export default function CameraApp() {
       "css-filter",
       "chroma-leak",
       "red-light",
+      "mist",
     ]
     const randomIndex = Math.floor(Math.random() * filters.length)
     return filters[randomIndex]
@@ -557,6 +559,84 @@ export default function CameraApp() {
       context.globalCompositeOperation = "multiply"
       context.fillStyle = "rgba(250, 0, 0, 1)" // #fa0000 with 100% opacity
       context.fillRect(0, 0, width, height)
+    } else if (filterType === "mist") {
+      // Mist filter - creates a soft, dreamy effect with gentle glow
+      const imageData = context.getImageData(0, 0, width, height)
+      const data = imageData.data
+
+      // First, apply a subtle blur for overall softness
+      const blurredData = applyBoxBlur(data, width, height, 2)
+
+      // Create a glow layer for bright areas
+      const glowData = new Uint8ClampedArray(data.length)
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = blurredData[i]
+        const g = blurredData[i + 1]
+        const b = blurredData[i + 2]
+
+        // Get pixel coordinates
+        const x = (i / 4) % width
+        const y = Math.floor(i / 4 / width)
+
+        // Calculate luminance to identify bright areas
+        const luminance = r * 0.299 + g * 0.587 + b * 0.114
+
+        // Apply subtle contrast reduction (mist effect softens contrast)
+        const contrast = 0.85
+        const softR = Math.min(255, Math.max(0, (r - 128) * contrast + 128))
+        const softG = Math.min(255, Math.max(0, (g - 128) * contrast + 128))
+        const softB = Math.min(255, Math.max(0, (b - 128) * contrast + 128))
+
+        // Set the softened values
+        data[i] = softR
+        data[i + 1] = softG
+        data[i + 2] = softB
+
+        // Create glow for bright areas (threshold around 150)
+        if (luminance > 150) {
+          const glowIntensity = ((luminance - 150) / 105) * 0.3 // Scale glow intensity
+
+          // Apply glow to surrounding pixels
+          for (let j = -3; j <= 3; j++) {
+            for (let k = -3; k <= 3; k++) {
+              const newX = x + k
+              const newY = y + j
+
+              if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+                const distance = Math.sqrt(j * j + k * k)
+                const falloff = Math.max(0, 1 - distance / 3) // Falloff over 3 pixel radius
+                const glowIndex = (newY * width + newX) * 4
+
+                const glowAmount = glowIntensity * falloff
+                glowData[glowIndex] = Math.min(255, (glowData[glowIndex] || 0) + softR * glowAmount)
+                glowData[glowIndex + 1] = Math.min(255, (glowData[glowIndex + 1] || 0) + softG * glowAmount)
+                glowData[glowIndex + 2] = Math.min(255, (glowData[glowIndex + 2] || 0) + softB * glowAmount)
+              }
+            }
+          }
+        }
+      }
+
+      // Blend the glow with the original softened image
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.min(255, data[i] + (glowData[i] || 0))
+        data[i + 1] = Math.min(255, data[i + 1] + (glowData[i + 1] || 0))
+        data[i + 2] = Math.min(255, data[i + 2] + (glowData[i + 2] || 0))
+      }
+
+      // Put the modified image data back
+      context.putImageData(imageData, 0, 0)
+
+      // Add a very subtle white overlay to simulate the hazy mist effect
+      context.globalCompositeOperation = "screen"
+      context.fillStyle = "rgba(255, 255, 255, 0.08)" // Very subtle white overlay
+      context.fillRect(0, 0, width, height)
+
+      // Add a subtle warm tone overlay for a more pleasing mist effect
+      context.globalCompositeOperation = "overlay"
+      context.fillStyle = "rgba(255, 248, 240, 0.05)" // Very subtle warm overlay
+      context.fillRect(0, 0, width, height)
     }
 
     // Reset composite operation
@@ -969,6 +1049,15 @@ export default function CameraApp() {
               style={{ width: "100px", height: "32px" }}
             >
               Red Light
+            </Button>
+            <Button
+              onClick={() => setActiveFilter("mist")}
+              size="sm"
+              variant={activeFilter === "mist" ? "default" : "outline"}
+              className="text-xs whitespace-nowrap px-2 py-2 transform -rotate-90 origin-center flex items-center justify-center bg-white text-black border-black hover:bg-black hover:text-white rounded-none"
+              style={{ width: "100px", height: "32px" }}
+            >
+              Mist
             </Button>
           </div>
         )}
